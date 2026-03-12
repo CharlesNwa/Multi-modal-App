@@ -1,0 +1,33 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Trained model weights (large binaries)
+models/*.pt
+models/*.pth
+
+# Keep checkpoint folder but not the weights inside
+models/checkpoints/*.pt
+models/checkpoints/*.pth
+
+# Environment variables
+.env
+*.env
+
+# Logs
+*.log
