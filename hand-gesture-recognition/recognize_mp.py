@@ -14,6 +14,7 @@ import os
 import sys
 
 CAMERA_INDEX = 1   # change to 0 if using laptop camera
+DEMO_OUTPUT  = os.path.join(os.path.dirname(os.path.abspath(__file__)), "demo_recording.mp4")
 
 
 # ── Gesture classifier (rule-based, no ML model needed) ─────────────────────
@@ -85,13 +86,15 @@ def run():
     cap.set(cv2.CAP_PROP_FPS, 30)
     print("Camera ready. Press Q to quit.\n")
 
-    win = "Hand Gesture Recognition"
+    win = "Hand Gesture Recognition  |  R = record  Q = quit"
     cv2.namedWindow(win, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(win, 800, 600)
 
     label     = ""
     conf      = 0.0
     prev_time = time.time()
+    recording = False
+    writer    = None
 
     while True:
         ret, frame = cap.read()
@@ -151,10 +154,32 @@ def run():
         cv2.putText(frame, "Q = quit", (10, h - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.45, (120, 120, 120), 1)
 
-        cv2.imshow(win, frame)
-        if cv2.waitKey(1) & 0xFF in (ord('q'), ord('Q'), 27):
-            break
+        # Recording indicator
+        if recording:
+            cv2.circle(frame, (w - 20, 20), 8, (0, 0, 255), -1)
+            cv2.putText(frame, "REC", (w - 55, 25),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+            writer.write(frame)
 
+        cv2.imshow(win, frame)
+        key = cv2.waitKey(1) & 0xFF
+        if key in (ord('q'), ord('Q'), 27):
+            break
+        if key in (ord('r'), ord('R')):
+            if not recording:
+                fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+                writer = cv2.VideoWriter(DEMO_OUTPUT, fourcc, 20, (640, 480))
+                recording = True
+                print(f"Recording started → {DEMO_OUTPUT}")
+            else:
+                recording = False
+                writer.release()
+                writer = None
+                print(f"Recording saved → {DEMO_OUTPUT}")
+
+    if writer:
+        writer.release()
+        print(f"Recording saved → {DEMO_OUTPUT}")
     cap.release()
     hands.close()
     cv2.destroyAllWindows()
