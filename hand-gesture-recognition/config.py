@@ -18,10 +18,12 @@ for directory in [RAW_DATA_DIR, PROCESSED_DATA_DIR, CHECKPOINTS_DIR]:
 
 # ==================== Gesture Configuration ====================
 GESTURES = {
-    0: "hello_im_charles",
-    1: "gesture_recognition_system",
-    2: "from_nigeria",
-    3: "neutral"
+    0: "like",
+    1: "dislike",
+    2: "peace",
+    3: "stop",
+    4: "fist",
+    5: "ok",
 }
 
 GESTURE_NAMES = list(GESTURES.values())
@@ -29,10 +31,12 @@ NUM_CLASSES = len(GESTURES)
 
 # Display labels shown on screen during inference
 GESTURE_LABELS = {
-    "hello_im_charles":           "Hello, I'm Charles",
-    "gesture_recognition_system": "Real-Time Hand Gesture Recognition System",
-    "from_nigeria":               "I am from Nigeria",
-    "neutral":                    "",
+    "like":    "Thumbs Up",
+    "dislike": "Thumbs Down",
+    "peace":   "Peace",
+    "stop":    "Stop",
+    "fist":    "Fist",
+    "ok":      "OK",
 }
 
 # ==================== MediaPipe Settings ====================
@@ -73,7 +77,7 @@ VAL_SPLIT = 0.15
 TEST_SPLIT = 0.15
 
 # ==================== Inference Settings ====================
-CONFIDENCE_THRESHOLD = 0.7  # Minimum confidence to display predicted gesture
+CONFIDENCE_THRESHOLD = 0.3  # Minimum confidence to display predicted gesture
 SMOOTHING_WINDOW = 5  # Number of predictions to smooth over
 
 # ==================== Visualization Settings ====================

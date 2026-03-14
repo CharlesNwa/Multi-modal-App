@@ -223,8 +223,8 @@ class GestureCollector:
         cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(win_name, 800, 600)
 
-        print(f"\nRecording '{gesture_name}' for {duration}s  —  file: {video_fname}")
-        print("Window opened. Press Q to cancel.\n")
+        print(f"\nCamera open — perform your gesture.")
+        print("  SPACE or S = save  |  Q = cancel\n")
 
         # Flush stale frames
         for _ in range(5):
@@ -232,12 +232,14 @@ class GestureCollector:
 
         start_time      = time.time()
         frames_captured = 0
-        target_frames   = int(duration * config.FPS)
         failed_reads    = 0
         hands_detected  = 0
         cancelled       = False
+        saved           = False
 
-        while time.time() - start_time < duration:
+        print("  SPACE or S = save & finish  |  Q = cancel\n")
+
+        while True:
             ret, frame = self.cap.read()
 
             if not ret or frame is None:
@@ -273,26 +275,44 @@ class GestureCollector:
             display = frame.copy()
             draw_hands_ui(display, left_hand, right_hand)
 
-            elapsed   = time.time() - start_time
-            remaining = max(0.0, duration - elapsed)
-            progress  = int(min(100, elapsed / duration * 100))
+            elapsed = time.time() - start_time
+            h, w = display.shape[:2]
 
-            _draw_status_bar(display, gesture_name, remaining, progress,
-                             left_hand is not None, right_hand is not None)
+            # Top bar
+            cv2.rectangle(display, (0, 0), (w, 45), (20, 20, 20), -1)
+            cv2.putText(display, f"REC  {gesture_name.upper()}", (12, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.85, (0, 0, 255), 2)
+            elapsed_txt = f"{elapsed:.1f}s  [{frames_captured} frames]"
+            (tw, _), _ = cv2.getTextSize(elapsed_txt, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+            cv2.putText(display, elapsed_txt, (w - tw - 12, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 200, 255), 2)
+
+            # Bottom hint bar
+            cv2.rectangle(display, (0, h - 38), (w, h), (20, 20, 20), -1)
+            lc = (0, 255, 0) if left_hand is not None else (60, 60, 60)
+            rc = (0, 255, 255) if right_hand is not None else (60, 60, 60)
+            cv2.circle(display, (20, h - 19), 8, lc, -1)
+            cv2.putText(display, "L", (14, h - 14), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1)
+            cv2.circle(display, (42, h - 19), 8, rc, -1)
+            cv2.putText(display, "R", (36, h - 14), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1)
+            cv2.putText(display, "SPACE/S = Save   Q = Cancel", (65, h - 12),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 100), 1)
 
             cv2.imshow(win_name, display)
             key = cv2.waitKey(1) & 0xFF
+
             if key in (ord('q'), ord('Q'), 27):
                 print("Recording cancelled.")
                 cancelled = True
                 break
+            elif key in (ord('s'), ord('S'), 32):  # S or SPACE
+                saved = True
+                print(f"\nSaved! {frames_captured} frames captured.")
+                break
 
             if frames_captured % 15 == 0:
-                print(f"\r  [{progress:3d}%] {frames_captured} frames | {remaining:.1f}s left",
+                print(f"\r  {frames_captured} frames | {elapsed:.1f}s elapsed",
                       end="", flush=True)
-
-            if frames_captured >= target_frames:
-                break
 
         print(f"\r  [100%] {frames_captured} frames | Done!          ", flush=True)
 
@@ -302,7 +322,7 @@ class GestureCollector:
             self.video_writer = None
         cv2.destroyWindow(win_name)
 
-        if frames_captured == 0 or cancelled:
+        if cancelled or not saved or frames_captured == 0:
             print("No frames captured." if frames_captured == 0 else "")
             return False
 
@@ -430,6 +450,7 @@ class GestureCollector:
         print(f"  Duration : {config.VIDEO_DURATION_SECONDS}s per recording")
         print()
         print("  Commands : preview | stats | quit")
+        print("  In window: SPACE or S = save  |  Q = cancel")
         print("  Record   : type a gesture name")
         print("-" * 60)
 
@@ -445,8 +466,15 @@ class GestureCollector:
             elif user_input == "preview":
                 self.display_live_preview()
             elif user_input in config.GESTURE_NAMES:
-                ok = self.record_gesture(user_input)
-                print("Saved!" if ok else "Recording failed — try again.")
+                while True:
+                    ok = self.record_gesture(user_input)
+                    if ok:
+                        print_gesture_stats()
+                        again = input(f"\nRecord another '{user_input}'? (Y to continue / N to stop): ").strip().lower()
+                        if again != 'y':
+                            break
+                    else:
+                        break
             else:
                 print(f"Unknown: '{user_input}'")
                 print(f"  Gestures : {', '.join(config.GESTURE_NAMES)}")
@@ -467,7 +495,9 @@ def main():
         traceback.print_exc()
     finally:
         print("Cleaning up...")
+        input("\nPress Enter to close...")
 
 
 if __name__ == "__main__":
     main()
+
