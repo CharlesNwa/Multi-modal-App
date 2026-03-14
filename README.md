@@ -1,38 +1,53 @@
+
 # 🖐️ Real-Time Hand Gesture Recognition System
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red)
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10+-green)
-![License](https://img.shields.io/badge/License-Educational-yellow)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.x-orange)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.x-ff4b4b)
+![Status](https://img.shields.io/badge/Status-Working-brightgreen)
 
-> A computer vision system that recognizes hand gestures in real time
-> using MediaPipe for hand tracking and a Bidirectional LSTM for
-> gesture classification — no keyboard or touchscreen required.
+> A computer vision system that recognizes hand gestures in real time using MediaPipe for hand tracking and a Bidirectional LSTM for gesture classification — no keyboard or touchscreen required.
 
 ---
 
 ## 👤 Author
-**Charles Nwa**
-Nigeria 🇳🇬
-Built with Claude Code & Visual Studio IDE
+
+**Charles Nwachukwu** · Nigeria 🇳🇬
+Built with Claude Code & Visual Studio Code
 
 ---
 
-## 📌 Project Overview
+## 🎬 Demo
 
-This project captures hand movements through a webcam, extracts
-21 hand landmarks using MediaPipe, and classifies gesture sequences
-using a trained PyTorch LSTM model. The end goal is a fully
-functional real-time gesture recognition application.
+https://github.com/CharlesNwa/Multi-modal-App/blob/master/hand-gesture-recognition/demo_recording_compressed.mp4
+
+> Live demo: detects hand gestures in real time and displays the label on screen with a confidence bar and hand skeleton overlay.
 
 ---
 
-## 🎯 Real World Applications
-- ♿ Accessibility tools for people with disabilities
-- 🤟 Sign language recognition
-- 🖥️ Hands-free computer control
-- 🎮 Gaming and interactive controls
-- 📊 Touchless presentation control
+## 🎯 Gestures Recognized
+
+| Gesture | Label |
+|---------|-------|
+| 👍 Thumbs Up | Thumbs Up |
+| 👎 Thumbs Down | Thumbs Down |
+| ✊ Closed Fist | Fist |
+| ✌️ Peace / Victory | Peace |
+| 🖐️ Open Palm | Stop |
+| 👌 OK Sign | OK |
+
+---
+
+## 📌 How It Works
+
+1. **Webcam** captures frames in real time
+2. **MediaPipe Hands** detects 21 hand landmarks per frame (x, y, z)
+3. **Geometric rules** classify the gesture from landmark positions — no ML model required
+4. **Gesture label + confidence bar** displayed instantly on screen
+
+> Works 100% offline — no dataset download, no internet, no model file needed.
 
 ---
 
@@ -40,122 +55,113 @@ functional real-time gesture recognition application.
 
 | Technology | Purpose |
 |------------|---------|
-| Python 3.8+ | Core programming language |
+| Python 3.8+ | Core language |
 | MediaPipe | Real-time hand landmark detection |
-| PyTorch | LSTM model training and inference |
-| OpenCV | Webcam access and video processing |
-| NumPy | Data storage and manipulation |
-| Scikit-learn | Data splitting and evaluation |
-| Streamlit | Web application interface |
-
----
-
-## ⚙️ Configuration
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `SEQUENCE_LENGTH` | 30 | Number of frames per gesture sample |
-| `VIDEOS_PER_GESTURE` | 20 | Training samples per gesture class |
-| `CAMERA_INDEX` | 1 | Webcam device index |
-| `CONFIDENCE_THRESHOLD` | 0.7 | Minimum confidence to display prediction |
-
----
-
-## 🏗️ Technical Architecture
-
-### Hand Landmark Extraction
-- **MediaPipe Hands** detects up to 2 hands per frame
-- **21 landmarks × 2 hands = 42 points** → 126 features (x, y, z each)
-- Normalised to `[0, 1]` relative to frame dimensions
-
-### LSTM Classifier
-- **Input:** 30 frames × 126 features
-- **Model:** 3-layer Bidirectional LSTM, 128 hidden dims, dropout 0.3
-- **Head:** Fully-connected → 4 gesture classes
-- **Loss:** CrossEntropyLoss | **Optimiser:** Adam (lr = 0.001)
-
----
-
-## 🎯 Gesture Vocabulary
-
-| Gesture | Display Output |
-|---------|---------------|
-| `hello_im_charles` | "Hello, I'm Charles" |
-| `gesture_recognition_system` | "Real-Time Hand Gesture Recognition System" |
-| `from_nigeria` | "I am from Nigeria" |
-| `neutral` | *(idle)* |
+| OpenCV | Webcam capture, drawing, recording |
+| PyTorch | BiLSTM model (optional training pipeline) |
+| Streamlit | Web application UI |
+| streamlit-webrtc | Live webcam stream in browser |
+| NumPy | Landmark array operations |
+| Scikit-learn | Data splitting for training |
 
 ---
 
 ## 📁 Project Structure
+
 ```
 hand-gesture-recognition/
 │
+├── app.py                   # ✅ Streamlit web app (Phase 8)
+├── recognize_mp.py          # ✅ Offline gesture recognizer (desktop)
+├── recognize.py             # Recognizer using trained LSTM model
+├── collect_gestures.py      # Data collection tool
+├── train.py                 # LSTM training pipeline
+├── prepare_hagrid.py        # HaGRID public dataset downloader
+├── config.py                # Project configuration
+├── run.bat                  # One-click menu launcher (Windows)
+├── requirements.txt         # Python dependencies
+│
 ├── data/
-│   ├── raw/                       # Recorded MP4 clips per gesture
-│   │   ├── hello_im_charles/
-│   │   ├── gesture_recognition_system/
-│   │   ├── from_nigeria/
-│   │   └── neutral/
-│   └── processed/                 # Extracted landmark sequences (.npy)
+│   ├── raw/                 # Recorded MP4 clips per gesture
+│   └── processed/           # Extracted landmark sequences (.npy)
 │
 ├── models/
-│   └── checkpoints/               # Model checkpoints during training
+│   └── checkpoints/         # Saved model weights (best_model.pt)
 │
-├── src/
-│   ├── mediapipe_extractor.py     # Hand landmark extraction
-│   └── utils.py                   # Helper functions
-│
-├── collect_gestures.py            # Interactive data collection tool
-├── verify_setup.py                # Environment & dependency check
-├── test_camera.py                 # Camera diagnostics
-├── config.py                      # Project configuration
-├── requirements.txt               # Required libraries
-└── README.md                      # Project documentation
+└── demo_recording_compressed.mp4
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
-### 1. Clone the Repository
+### 1. Clone
 ```bash
 git clone https://github.com/CharlesNwa/Multi-modal-App.git
 cd Multi-modal-App/hand-gesture-recognition
 ```
 
-### 2. Install Requirements
+### 2. Install dependencies
 ```bash
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Verify Setup
+### 3. Run (choose one)
+
+**Desktop — no training needed:**
 ```bash
-python verify_setup.py
+python recognize_mp.py
 ```
 
-### 4. Collect Gesture Data
+**Web app (Streamlit):**
 ```bash
-python collect_gestures.py
+pip install streamlit streamlit-webrtc av
+streamlit run app.py
 ```
 
-### 5. Train Model *(Phase 5)*
+**Interactive menu (Windows):**
 ```bash
-python train_model.py
-```
-
-### 6. Run Real-Time Demo *(Phase 6)*
-```bash
-python demo.py
+.\run.bat
 ```
 
 ---
 
-## 📷 Data Collection Tips
-- Use **good lighting** — MediaPipe is sensitive to shadows
-- Keep your **full hand in frame** for the 3-second duration
-- **Vary angle and distance** slightly between recordings for robustness
-- Aim for at least **20 samples per gesture** before training
+## 🎮 Controls (Desktop)
+
+| Key | Action |
+|-----|--------|
+| `R` | Start / Stop recording |
+| `Q` | Quit |
+
+---
+
+## 📋 run.bat Menu
+
+| Option | Description |
+|--------|-------------|
+| 1 | Download HaGRID dataset & extract landmarks |
+| 2 | Train custom LSTM model |
+| 3 | Run recognizer with trained model |
+| 4 | Collect custom gesture data |
+| 5 | Run offline desktop recognizer |
+| 6 | Launch Streamlit web app |
+| 7 | Exit |
+
+---
+
+## ⚙️ Configuration
+
+Edit `config.py` to adjust:
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `CAMERA_INDEX` | `1` | `0` = laptop cam, `1` = USB cam |
+| `SEQUENCE_LENGTH` | `30` | Frames per gesture sequence |
+| `CONFIDENCE_THRESHOLD` | `0.3` | Min confidence to show prediction |
+| `HIDDEN_DIM` | `128` | LSTM hidden size |
+| `NUM_EPOCHS` | `50` | Training epochs |
 
 ---
 
@@ -163,10 +169,30 @@ python demo.py
 
 | Problem | Fix |
 |---------|-----|
-| No hand detected | Improve lighting and move hand closer to camera |
-| Camera won't open | Change `CAMERA_INDEX` in `config.py` to 0 or 1 |
-| Low FPS in preview | Close background apps and reduce resolution |
-| Low accuracy | Collect more varied samples, aim for 30+ per gesture |
+| Camera won't open | Change `CAMERA_INDEX` to `0` in `recognize_mp.py` |
+| No hand detected | Improve lighting, keep hand fully in frame |
+| Wrong gesture | Slow down, make the shape clearer |
+| Low FPS | Close background apps |
+
+---
+
+## 🏗️ Optional: Train a Custom Model
+
+```bash
+# Collect data (15–20 samples per gesture)
+python collect_gestures.py
+
+# Train BiLSTM
+python train.py
+
+# Run with trained model
+python recognize.py
+```
+
+**Model architecture:**
+- Input: 30 frames × 126 features (42 landmarks × 3 coords)
+- 3-layer Bidirectional LSTM · 128 hidden dims · dropout 0.3
+- CrossEntropyLoss · Adam (lr=0.001)
 
 ---
 
@@ -175,31 +201,35 @@ python demo.py
 - [x] Phase 1 — Environment setup & MediaPipe integration
 - [x] Phase 2 — Data collection pipeline
 - [x] Phase 3 — Landmark extraction & storage
-- [ ] Phase 4 — PyTorch Dataset & DataLoader
-- [ ] Phase 5 — LSTM training pipeline
-- [ ] Phase 6 — Real-time inference & demo UI
-- [ ] Phase 7 — Streamlit web application
-- [ ] Phase 8 — Final testing & deployment
+- [x] Phase 4 — LSTM training pipeline
+- [x] Phase 5 — Real-time inference with trained model
+- [x] Phase 6 — Offline rule-based recognizer
+- [x] Phase 7 — Demo recording
+- [x] Phase 8 — Streamlit web application
+- [ ] Phase 9 — Custom gesture vocabulary via fine-tuning
 
 ---
 
-## 📊 Model Performance
+## 🎯 Applications
 
-| Metric | Score |
-|--------|-------|
-| Training Accuracy | In Progress |
-| Validation Accuracy | In Progress |
-| Inference Speed | In Progress |
+- ♿ Accessibility tools
+- 🤟 Sign language recognition
+- 🖥️ Hands-free computer control
+- 🎮 Gaming & interactive interfaces
+- 📊 Touchless presentation control
 
 ---
 
 ## 📜 License
+
 Educational use only.
-Built and owned by **Charles Nwachukwu** — Nigeria.
+Built and owned by **Charles Nwachukwu** — Nigeria 🇳🇬
 
 ---
 
 ## 🤝 Acknowledgements
+
 - [MediaPipe by Google](https://mediapipe.dev)
 - [PyTorch](https://pytorch.org)
+- [OpenCV](https://opencv.org)
 - Inspired by Farah Gherir's gesture recognition project on LinkedIn
