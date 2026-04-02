@@ -31,3 +31,6 @@ models/checkpoints/*.pth
 
 # Logs
 *.log
+
+# Claude Code memory
+.claude/
